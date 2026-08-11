@@ -1,0 +1,65 @@
+name: BZEAD
+options:
+  bundleIdPrefix: com.bzead
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+packages:
+  Stripe:
+    url: https://github.com/stripe/stripe-ios
+    from: "24.11.0"
+  OneSignalXCFramework:
+    url: https://github.com/OneSignal/OneSignal-XCFramework
+    from: "5.2.8"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+configs:
+  Debug: debug
+  Release: release
+
+configFiles:
+  Debug: Secrets.xcconfig
+  Release: Secrets.xcconfig
+
+targets:
+  BZEAD:
+    type: application
+    platform: iOS
+    sources:
+      - path: BZEAD
+        excludes:
+          - "**/.DS_Store"
+    resources:
+      - path: BZEAD/Resources
+        optional: true
+      - path: Secrets.plist
+        optional: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bzead.ios
+        INFOPLIST_FILE: BZEAD/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 1.0
+        ENABLE_PREVIEWS: YES
+    dependencies:
+      - package: Stripe
+        product: StripePaymentSheet
+      - package: OneSignalXCFramework
+        product: OneSignalFramework
+
+schemes:
+  BZEAD:
+    build:
+      targets:
+        BZEAD: all
+    run:
+      config: Debug

@@ -1,0 +1,49 @@
+version: 1
+applications:
+  - appRoot: Bzeadstore-main
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - npm install --no-audit --no-fund
+        build:
+          commands:
+            - npm run build
+            - echo "{\"build\":\"${AWS_BRANCH:-local}-${AWS_COMMIT_ID:-dev}-$(date -u +%Y%m%d%H%M%S)\"}" > dist/build-info.json
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+      buildSizeConfig:
+        maxArtifactSize: 50MB
+    customRules:
+      # Social preview JPEG (optional browser shortcut — og:image uses Supabase URL directly)
+      - source: /og-image/<*>
+        target: https://aiiefgjfftmerayihpbv.supabase.co/functions/v1/product-og-image?slug=<*>
+        status: 200
+      - source: /og-image/<*>/
+        target: https://aiiefgjfftmerayihpbv.supabase.co/functions/v1/product-og-image?slug=<*>
+        status: 200
+      # Pre-built share pages (generated on every deploy) — WhatsApp/Facebook read OG tags directly from CDN
+      - source: /share/<slug>
+        target: /share/<slug>/index.html
+        status: 200
+      - source: /share/<slug>/
+        target: /share/<slug>/index.html
+        status: 200
+      # Product pages — SSR mode: injects OG meta into SPA shell so social bots see product image
+      - source: /products/<*>
+        target: https://aiiefgjfftmerayihpbv.supabase.co/functions/v1/product-og?slug=<*>&mode=ssr
+        status: 200
+      - source: /products/<*>/
+        target: https://aiiefgjfftmerayihpbv.supabase.co/functions/v1/product-og?slug=<*>&mode=ssr
+        status: 200
+      # SPA fallback: serve index.html for all routes EXCEPT static files
+      - source: </^[^.]+$|\.(?!(css|gif|ico|jpg|jpeg|js|json|map|png|svg|txt|webp|woff|woff2)$)([^.]+$)/>
+        target: /index.html
+        status: 200

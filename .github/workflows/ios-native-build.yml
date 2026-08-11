@@ -1,0 +1,99 @@
+name: iOS Native Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - BZEAD-iOS-main/**
+      - .github/workflows/ios-native-build.yml
+
+jobs:
+  build-simulator:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Create Secrets.xcconfig
+        working-directory: BZEAD-iOS-main
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          PUBLIC_APP_URL: ${{ secrets.PUBLIC_APP_URL }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+        run: |
+          URL="${SUPABASE_URL:-https://aiiefgjfftmerayihpbv.supabase.co}"
+          PUBLIC="${PUBLIC_APP_URL:-https://bzead.com}"
+          URL_HOST="${URL#https://}"
+          PUBLIC_HOST="${PUBLIC#https://}"
+          printf '%s\n' \
+            "SUPABASE_URL = https:/\$()/${URL_HOST}" \
+            "SUPABASE_ANON_KEY = ${SUPABASE_ANON_KEY}" \
+            "PUBLIC_APP_URL = https:/\$()/${PUBLIC_HOST}" \
+            "STRIPE_PUBLISHABLE_KEY = ${STRIPE_PUBLISHABLE_KEY}" \
+            "ONESIGNAL_APP_ID = ${ONESIGNAL_APP_ID}" \
+            > Secrets.xcconfig
+
+      - name: Create Secrets.plist
+        working-directory: BZEAD-iOS-main
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          PUBLIC_APP_URL: ${{ secrets.PUBLIC_APP_URL }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+        run: |
+          URL="${SUPABASE_URL:-https://aiiefgjfftmerayihpbv.supabase.co}"
+          PUBLIC="${PUBLIC_APP_URL:-https://bzead.com}"
+          cat > Secrets.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>SUPABASE_URL</key>
+            <string>${URL}</string>
+            <key>SUPABASE_ANON_KEY</key>
+            <string>${SUPABASE_ANON_KEY}</string>
+            <key>PUBLIC_APP_URL</key>
+            <string>${PUBLIC}</string>
+            <key>STRIPE_PUBLISHABLE_KEY</key>
+            <string>${STRIPE_PUBLISHABLE_KEY}</string>
+            <key>ONESIGNAL_APP_ID</key>
+            <string>${ONESIGNAL_APP_ID}</string>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Generate Xcode project
+        working-directory: BZEAD-iOS-main
+        run: xcodegen generate
+
+      - name: Build for iOS Simulator
+        working-directory: BZEAD-iOS-main
+        run: |
+          xcodebuild \
+            -scheme BZEAD \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -configuration Debug \
+            -derivedDataPath DerivedData \
+            build
+
+      - name: Package BZEAD-debug.zip
+        working-directory: BZEAD-iOS-main
+        run: |
+          APP="$(find DerivedData -name 'BZEAD.app' -type d | head -1)"
+          test -n "$APP"
+          cp -R "$APP" BZEAD-debug.app
+          zip -r BZEAD-debug.zip BZEAD-debug.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BZEAD-debug
+          path: BZEAD-iOS-main/BZEAD-debug.zip
+          retention-days: 14

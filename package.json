@@ -1,0 +1,23 @@
+{
+  "name": "beauzead-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "Bzeadstore-main"
+  ],
+  "scripts": {
+    "dev": "npm --prefix Bzeadstore-main run dev",
+    "build": "npm --prefix Bzeadstore-main run build",
+    "test": "npm --prefix Bzeadstore-main run test",
+    "lint": "npm --prefix Bzeadstore-main run lint"
+  },
+  "dependencies": {
+    "pg": "^8.21.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    }
+  }
+}

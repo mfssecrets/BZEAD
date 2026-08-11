@@ -1,2 +1,2 @@
-# BZEAD
-A GLOBAL ECOMMERCE APP
+# bzead
+A multivendor ecommerce app with global shipping availability.
