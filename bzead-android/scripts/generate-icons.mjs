@@ -35,41 +35,48 @@ async function ensureDir(dir) {
 }
 
 async function generateLauncherIcons() {
-  const img = sharp(SOURCE).resize(192, 192, { fit: 'contain', background: { r: 30, g: 41, b: 59 } });
+  // Fill the entire launcher icon with the logo. We use a circular mask so the
+  // logo is full-bleed inside the adaptive launcher shape.
+  const backgroundColor = { r: 30, g: 41, b: 59 };
 
   for (const [density, size] of Object.entries(DENSITIES)) {
     const dir = path.join(RES_DIR, `mipmap-${density}`);
     await ensureDir(dir);
 
+    // Full-bleed square logo with background fill.
+    const fullBleed = sharp(SOURCE)
+      .resize(size, size, { fit: 'cover' })
+      .flatten({ background: backgroundColor });
+
     // Legacy rounded square (Android < 26)
-    await img
-      .clone()
-      .resize(size, size, { fit: 'contain', background: { r: 30, g: 41, b: 59 } })
-      .png()
-      .toFile(path.join(dir, 'ic_launcher_foreground.png'));
+    await fullBleed.png().toFile(path.join(dir, 'ic_launcher.png'));
 
-    await img
-      .clone()
-      .resize(size, size, { fit: 'contain', background: { r: 30, g: 41, b: 59 } })
-      .png()
-      .toFile(path.join(dir, 'ic_launcher.png'));
-
-    // Round icon
-    await img
-      .clone()
-      .resize(size, size, { fit: 'contain', background: { r: 30, g: 41, b: 59 } })
+    // Round icon: same full-bleed content inside a circular mask.
+    const circleMask = Buffer.from(
+      `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`
+    );
+    await fullBleed
+      .composite([{ input: circleMask, blend: 'dest-in' }])
       .png()
       .toFile(path.join(dir, 'ic_launcher_round.png'));
+
+    // Adaptive foreground: full-bleed logo used as the foreground layer.
+    // The background layer is provided by ic_launcher_background color.
+    await sharp(SOURCE)
+      .resize(size, size, { fit: 'cover' })
+      .png()
+      .toFile(path.join(dir, 'ic_launcher_foreground.png'));
   }
 
   // Play Store icon
   await ensureDir(path.dirname(PLAY_STORE.out));
   await sharp(SOURCE)
-    .resize(PLAY_STORE.size, PLAY_STORE.size, { fit: 'contain', background: { r: 30, g: 41, b: 59 } })
+    .resize(PLAY_STORE.size, PLAY_STORE.size, { fit: 'cover' })
+    .flatten({ background: backgroundColor })
     .png()
     .toFile(PLAY_STORE.out);
 
-  console.log('✅ Launcher icons generated');
+  console.log('✅ Launcher icons generated (full-bleed)');
 }
 
 async function generateSplash() {
