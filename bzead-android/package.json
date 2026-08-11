@@ -1,0 +1,33 @@
+{
+  "name": "bzead-android",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "npx cap sync",
+    "build:web": "cd ../Bzeadstore-main && npm run build:buyer && cd ../bzead-android && node scripts/prepare-assets.mjs",
+    "copy": "node scripts/prepare-assets.mjs && npx cap copy",
+    "open:android": "npx cap open android",
+    "build:debug": "node scripts/build-android.mjs debug",
+    "build:release": "node scripts/build-android.mjs release",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.3",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/dialog": "^8.0.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/geolocation": "^8.0.0",
+    "@capacitor/share": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
+    "onesignal-cordova-plugin": "^5.2.13"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "sharp": "^0.33.5",
+    "typescript": "^7.0.2"
+  }
+}
