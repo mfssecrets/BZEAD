@@ -298,7 +298,10 @@ export const CartPage: React.FC = () => {
               </div>
 
               {/* ─── Cart Items ─── */}
-              <div className="native-cart-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-2 md:block md:overflow-visible md:px-0">
+              <div
+                className="native-cart-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-2 md:block md:overflow-visible md:px-0"
+                style={isNativePlatform ? { paddingBottom: '140px' } : undefined}
+              >
                 {cartItems.map((cartItem) => {
                 const itemPrice =
                   cartItem.variantPrice ??
@@ -422,7 +425,20 @@ export const CartPage: React.FC = () => {
             {/* ═══════════════════════════════════════════════
                  CART SUMMARY (sticky above MobileNav on native)
                 ═══════════════════════════════════════════════ */}
-            <div className="native-cart-checkout shrink-0 px-2 pt-2 md:px-0 md:pt-0">
+            <div
+              className="native-cart-checkout shrink-0 px-2 pt-2 md:px-0 md:pt-0"
+              style={isNativePlatform ? {
+                position: 'fixed',
+                bottom: '3.75rem',
+                left: 0,
+                right: 0,
+                background: '#fff',
+                borderTop: '1px solid #e5e7eb',
+                boxShadow: '0 -2px 10px rgba(0,0,0,0.07)',
+                padding: '8px 16px 10px',
+                zIndex: 50,
+              } : undefined}
+            >
               {pricingLoading ? (
                 <div className="bg-white border border-[#ddd] rounded-[10px] p-6 sm:p-8 text-center">
                 <div className="flex items-center justify-center gap-3 mb-3">
