@@ -28,7 +28,7 @@
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-        <item name="windowSplashScreenBackground">#ffffff</item>
+        <item name="windowSplashScreenBackground">#0f1e50</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>

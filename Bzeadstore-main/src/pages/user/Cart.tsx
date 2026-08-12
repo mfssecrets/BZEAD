@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
-import { MobileNav } from '../../components/layout/MobileNav';
+
 import { ListSkeleton } from '../../components/common/Skeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
@@ -248,7 +248,7 @@ export const CartPage: React.FC = () => {
   return (
     <div
       className="h-[100dvh] overflow-hidden bg-white flex flex-col md:min-h-screen md:h-auto md:overflow-visible"
-      style={isNativePlatform ? { height: 'calc(100dvh - 3.75rem)', overflow: 'hidden' } : undefined}
+      style={isNativePlatform ? { height: '100dvh', overflow: 'hidden' } : undefined}
     >
       <Header />
 
@@ -551,7 +551,6 @@ export const CartPage: React.FC = () => {
       <div className="hidden md:block">
         <Footer />
       </div>
-      <MobileNav />
     </div>
   );
 };
