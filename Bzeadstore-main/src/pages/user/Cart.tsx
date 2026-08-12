@@ -246,7 +246,10 @@ export const CartPage: React.FC = () => {
   }, 0);
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-white flex flex-col md:min-h-screen md:h-auto md:overflow-visible">
+    <div
+      className="h-[100dvh] overflow-hidden bg-white flex flex-col md:min-h-screen md:h-auto md:overflow-visible"
+      style={isNativePlatform ? { height: 'calc(100dvh - 3.75rem)', overflow: 'hidden' } : undefined}
+    >
       <Header />
 
       <main className="flex flex-1 min-h-0 w-full max-w-[1100px] mx-auto flex-col bg-white px-0 py-0 pb-0 md:block md:bg-transparent md:px-4 md:py-5 md:pb-5">
@@ -300,7 +303,6 @@ export const CartPage: React.FC = () => {
               {/* ─── Cart Items ─── */}
               <div
                 className="native-cart-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-2 md:block md:overflow-visible md:px-0"
-                style={isNativePlatform ? { paddingBottom: '140px' } : undefined}
               >
                 {cartItems.map((cartItem) => {
                 const itemPrice =
@@ -428,15 +430,11 @@ export const CartPage: React.FC = () => {
             <div
               className="native-cart-checkout shrink-0 px-2 pt-2 md:px-0 md:pt-0"
               style={isNativePlatform ? {
-                position: 'fixed',
-                bottom: '3.75rem',
-                left: 0,
-                right: 0,
+                flexShrink: 0,
                 background: '#fff',
                 borderTop: '1px solid #e5e7eb',
                 boxShadow: '0 -2px 10px rgba(0,0,0,0.07)',
                 padding: '8px 16px 10px',
-                zIndex: 50,
               } : undefined}
             >
               {pricingLoading ? (
