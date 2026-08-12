@@ -457,3 +457,146 @@ We built a **separate, Play-Store-ready Capacitor Android wrapper** for the Bzea
 - Leaves your web app, iOS project, and existing APK project untouched
 
 The remaining work is mostly configuration (env vars, keystore, Play Console listing) and small web UI safe-area adjustments.
+
+---
+
+## 14. End-to-End UX Fixes (Session 2 — Aug 2025)
+
+All changes in this session are backward-compatible. Web users are never affected. Native-only overrides are scoped to `body.native-app` CSS.
+
+### 14.1 Header / Status Bar Overlap
+
+**Root cause:** `EdgeToEdge.enable(this)` was making the WebView draw behind the Android status bar.  
+**Fix:** Removed `EdgeToEdge` entirely from `MainActivity.java`. System bars now get their own space; the WebView is sandwiched between them with no overlap.
+
+### 14.2 Bottom Navigation Overlap
+
+**Root cause:** Android gesture bar was transparent, overlapping the `MobileNav` component.  
+**Fix:** Set `navigationBarColor = @android:color/white` and `windowLightNavigationBar = true` in `res/values/styles.xml`. Dark nav-bar icons on white background match the `bg-white` MobileNav bar exactly.
+
+### 14.3 Auth Pages — Double Header & Misaligned Form
+
+**Root cause:** `BuyerAuthLayout` renders its own `buyer-auth-nav`, duplicating the app Header visible in native. The "Log in" / "Sign up" page titles and brand logo were also redundant in native context.  
+**Fix:** `body.native-app` CSS rules in `Bzeadstore-main/src/index.css`:
+```css
+body.native-app .buyer-auth-nav { display: none !important; }
+body.native-app .buyer-auth-page-title { display: none !important; }
+body.native-app .buyer-auth-form-side .auth-brand-mark { display: none !important; }
+body.native-app .buyer-auth-form-side { align-items: center; justify-content: center; }
+body.native-app .buyer-auth-form-side .auth-card { margin-top: 0; width: 100%; }
+```
+
+### 14.4 App Icon Fills Full Area
+
+**Root cause:** `logo.png` (512×512) has transparent padding — actual logo content is only ~182×173 px centred on the canvas. Old `generate-icons.mjs` also used legacy 48 dp sizes for adaptive icon foreground densities (should be 108 dp).  
+**Fix in `bzead-android/scripts/generate-icons.mjs`:**
+- Pre-trim transparent padding: `sharp(source).trim().toBuffer()` before any resize
+- Use correct adaptive icon foreground sizes: `{mdpi:108, hdpi:162, xhdpi:216, xxhdpi:324, xxxhdpi:432}`
+- All icon variants now regenerated from the trimmed source
+
+### 14.5 Font Scaling
+
+**Root cause:** Android accessibility text-size settings were scaling up WebView fonts, making the UI oversized.  
+**Fix in `MainActivity.java`:**
+```java
+settings.setTextZoom(100);
+```
+
+### 14.6 Cart Checkout Button Hidden by Bottom Nav
+
+**Root cause:** MobileNav `fixed bottom-0` overlay was hiding the "Proceed to Checkout" button inside the `h-[100dvh]` flex container.  
+**Fix in `index.css`:**
+```css
+body.native-app .h-\[100dvh\].overflow-hidden {
+  height: calc(100dvh - 3.75rem) !important;
+}
+```
+
+### 14.7 Stripe Payment Gateway
+
+Multiple issues prevented Stripe from working inside the Capacitor WebView:
+
+| Issue | Fix |
+|-------|-----|
+| Stripe 3DS / card-auth popup could not open | Added `WebChromeClient.onCreateWindow()` in `MainActivity.java` to allow popup WebViews |
+| `return_url` after 3DS redirected outside the app | Added `<intent-filter autoVerify="true">` for `https://bzead.com` and `https://www.bzead.com` in `AndroidManifest.xml` |
+| App Links verification failed | Fixed `package_name` in `Bzeadstore-main/public/.well-known/assetlinks.json` from `"com.bzead.buyer"` → `"com.bzead.app"` |
+| JS popups blocked | Added `setJavaScriptCanOpenWindowsAutomatically(true)` in `MainActivity.java` |
+
+> **Action required before release:** Replace the `sha256_cert_fingerprints` placeholder in `assetlinks.json` with the actual SHA-256 of your release keystore.
+
+### 14.8 Fly-to-Cart Animation
+
+**New file:** `Bzeadstore-main/src/utils/flyToCart.ts`  
+- GPU-accelerated Web Animations API arc (no layout reflow)
+- Parabolic 3-keyframe trajectory with arc height = `max(60, distance × 0.35)`
+- Product thumbnail spins (0 → 400 °) and shrinks (1.0 → 0.07 scale) as it flies
+- Duration: 680 ms, easing: `ease-in`
+- Target: `#floating-cart-btn` on mobile, `#cart-icon` on desktop (set by `getCartTarget()`)
+- Wired into `useProductAddToCartFlow`, `ProductDetailsPage`, and `ProductVariantDialog`
+
+Cart icon bounce on item arrival (`cart-bounce` CSS class, 500 ms):
+```css
+@keyframes cartBounce {
+  0%   { transform: scale(1)    rotate(0deg);   }
+  25%  { transform: scale(1.45) rotate(-12deg); }
+  55%  { transform: scale(1.25) rotate(10deg);  }
+  75%  { transform: scale(1.1)  rotate(-5deg);  }
+  100% { transform: scale(1)    rotate(0deg);   }
+}
+```
+
+### 14.9 Hardware Back Button
+
+**Root cause:** `BzeadBackButtonPlugin.java` was firing `bridge.triggerJSEvent("backButton", "window", "{}")` (a window DOM event), but `CapacitorApp.addListener('backButton', …)` listens on Capacitor's internal plugin notification channel — the two channels never connected, so back button appeared to do nothing.
+
+**Fix in `BzeadBackButtonPlugin.java`:** Reduced to a stub with only the `@CapacitorPlugin` annotation. Capacitor 8 App plugin now handles the back button natively through the correct channel.
+
+**Logic in `nativeRuntime.tsx` → `useNativeBackButton`:**
+- Non-root page → `window.history.back()`
+- Root page, 1st press → show "Press back again to exit" snackbar (2 s timeout)
+- Root page, 2nd press within 2 s → `Dialog.confirm("Do you want to close the app?")` → Yes: `CapacitorApp.exitApp()`
+
+### 14.10 Page Persistence on App Resume
+
+**New hook:** `useNativePagePersist` in `Bzeadstore-main/src/mobile/nativeRuntime.tsx`  
+Listens for `CapacitorApp.addListener('appStateChange', …)`. When the app is resumed (`isActive: true`), it pushes the current `pathname` back into history so the WebView stays on the same page rather than reloading to home.  
+Wired into `App.tsx` at the top level.
+
+---
+
+## 15. Build Commands (current)
+
+```bash
+# 1. Build buyer web bundle
+cd /workspaces/BZEAD/Bzeadstore-main
+npm run build:buyer
+
+# 2. Sync into Android project
+cd /workspaces/BZEAD/bzead-android
+npx cap sync android
+
+# 3a. Debug APK (no keystore needed — for device testing)
+cd /workspaces/BZEAD/bzead-android/android
+./gradlew assembleDebug
+# Output: app/build/outputs/apk/debug/app-debug.apk
+
+# 3b. Release AAB (requires keystore — for Play Store)
+./gradlew bundleRelease
+# Output: app/build/outputs/bundle/release/app-release.aab
+```
+
+Latest debug APK: `bzead-android/android/app/build/outputs/apk/debug/app-debug.apk` (172 MB)
+
+---
+
+## 16. Outstanding Before Play Store Release
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Release keystore SHA-256 in `assetlinks.json` | ⚠️ Required | Stripe App Links won't verify without it |
+| Sign release AAB with keystore | ⚠️ Required | `./gradlew bundleRelease` + signing config |
+| Fill `BZEAD_ONESIGNAL_APP_ID` in `gradle.properties` | ⚠️ Required | Push notifications won't initialise |
+| Test Stripe 3DS flow on real device | Recommended | Use a Stripe test card that triggers 3DS |
+| Test hardware back + exit dialog | Recommended | Verify on physical device |
+| Fly-to-cart visual QA | Recommended | Check arc height on different screen sizes |

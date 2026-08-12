@@ -5,7 +5,7 @@ import type { Product } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { fetchProductById } from '../lib/productService';
-import { flyToCart } from '../utils/flyToCart';
+import { flyToCart, getCartTarget } from '../utils/flyToCart';
 import { useToast } from './useToast';
 import { useDestinationCountry } from './useDestinationCountry';
 import {
@@ -46,7 +46,7 @@ export function useProductAddToCartFlow({
   }, [product.id]);
 
   const animateToCart = useCallback(() => {
-    const cartIcon = document.getElementById('cart-icon');
+    const cartIcon = getCartTarget();
     if (imageRef?.current && cartIcon) {
       void flyToCart(imageRef.current, cartIcon);
     }

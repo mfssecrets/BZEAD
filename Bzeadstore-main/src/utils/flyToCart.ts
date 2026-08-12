@@ -1,6 +1,18 @@
 /**
- * Fly-to-cart animation: creates a thumbnail clone of the product image
- * and animates it toward the cart icon, then triggers a bounce.
+ * Returns the correct cart button to target for the fly animation.
+ * On mobile (< 768 px) the floating cart bubble is the primary target;
+ * on desktop the header cart icon is.
+ */
+export function getCartTarget(): HTMLElement | null {
+  const floating = document.getElementById('floating-cart-btn');
+  const header   = document.getElementById('cart-icon');
+  if (floating && window.innerWidth < 768) return floating;
+  return header || floating;
+}
+
+/**
+ * Fly-to-cart animation: arcs a thumbnail from the product image to the
+ * cart button along a parabolic path, then bounces the cart icon.
  * Returns a Promise that resolves when the flight completes.
  */
 export function flyToCart(
@@ -9,48 +21,79 @@ export function flyToCart(
 ): Promise<void> {
   return new Promise((resolve) => {
     const productRect = productEl.getBoundingClientRect();
-    const cartRect = cartEl.getBoundingClientRect();
+    const cartRect    = cartEl.getBoundingClientRect();
 
-    // Build a fresh <img> instead of cloneNode to avoid inherited
-    // Tailwind classes (w-full, h-full, relative) that fight inline styles.
-    const clone = document.createElement('img');
-    const src = (productEl as HTMLImageElement).currentSrc
-      || (productEl as HTMLImageElement).src
-      || '';
-    clone.src = src;
+    // Origin: centre of the product thumbnail
+    const startX = productRect.left + productRect.width  / 2;
+    const startY = productRect.top  + productRect.height / 2;
+    // Destination: centre of the cart button
+    const endX   = cartRect.left + cartRect.width  / 2;
+    const endY   = cartRect.top  + cartRect.height / 2;
+
+    const dx = endX - startX;
+    const dy = endY - startY;
+
+    // Arc height: pull the midpoint up by 35 % of the total distance so the
+    // throw curves naturally regardless of direction.
+    const dist      = Math.sqrt(dx * dx + dy * dy);
+    const arcPull   = Math.max(60, dist * 0.35);
+    // Perpendicular offset — always arc "above" (negative screen-Y = upward)
+    const arcMidDX  = dx  / 2;
+    const arcMidDY  = dy  / 2 - arcPull;
+
+    // Thumbnail starts at product image size, shrinks to a dot
+    const startW = Math.min(productRect.width,  80);
+    const startH = Math.min(productRect.height, 80);
+
+    const clone = document.createElement('img') as HTMLImageElement;
+    clone.src = (productEl as HTMLImageElement).currentSrc
+             || (productEl as HTMLImageElement).src
+             || '';
     clone.style.cssText = [
-      `position: fixed`,
-      `left: ${productRect.left}px`,
-      `top: ${productRect.top}px`,
-      `width: ${productRect.width}px`,
-      `height: ${productRect.height}px`,
-      `z-index: 999999`,
-      `pointer-events: none`,
-      `border-radius: 12px`,
-      `object-fit: contain`,
-      `opacity: 1`,
-      `background: transparent`,
+      'position: fixed',
+      `left: ${startX - startW / 2}px`,
+      `top:  ${startY - startH / 2}px`,
+      `width:  ${startW}px`,
+      `height: ${startH}px`,
+      'z-index: 999999',
+      'pointer-events: none',
+      'border-radius: 10px',
+      'object-fit: cover',
+      'transform-origin: center',
+      'will-change: transform, opacity',
     ].join('; ');
 
     document.body.appendChild(clone);
 
-    // Force a reflow so the browser registers the initial position
-    // BEFORE we apply the transition + target values.
-    clone.getBoundingClientRect();
-
-    // Now enable the transition and set the target
-    clone.style.transition = 'all 0.8s cubic-bezier(0.65, -0.2, 0.25, 1.2)';
-    clone.style.left = `${cartRect.left + cartRect.width / 2 - 10}px`;
-    clone.style.top = `${cartRect.top + cartRect.height / 2 - 10}px`;
-    clone.style.width = '20px';
-    clone.style.height = '20px';
-    clone.style.opacity = '0';
+    // Parabolic arc via Web Animations API (GPU-accelerated, no layout reflow)
+    clone.animate(
+      [
+        {
+          transform: 'translate(0, 0) scale(1) rotate(0deg)',
+          opacity: '1',
+          borderRadius: '10px',
+        },
+        {
+          // Peak of the arc — halfway through the flight
+          transform: `translate(${arcMidDX}px, ${arcMidDY}px) scale(0.55) rotate(200deg)`,
+          opacity: '0.9',
+          borderRadius: '50%',
+          offset: 0.42,
+        },
+        {
+          transform: `translate(${dx}px, ${dy}px) scale(0.07) rotate(400deg)`,
+          opacity: '0',
+          borderRadius: '50%',
+        },
+      ],
+      { duration: 680, easing: 'ease-in', fill: 'forwards' },
+    );
 
     setTimeout(() => {
       clone.remove();
       cartEl.classList.add('cart-bounce');
-      setTimeout(() => cartEl.classList.remove('cart-bounce'), 350);
+      setTimeout(() => cartEl.classList.remove('cart-bounce'), 500);
       resolve();
-    }, 850);
+    }, 700);
   });
 }

@@ -20,6 +20,15 @@ const DENSITIES = {
   xxxhdpi: 192,
 };
 
+// Adaptive foreground layer must be the full 108dp canvas at each density.
+const FOREGROUND_DENSITIES = {
+  mdpi: 108,
+  hdpi: 162,
+  xhdpi: 216,
+  xxhdpi: 324,
+  xxxhdpi: 432,
+};
+
 const PLAY_STORE = { size: 512, out: path.join(ROOT, 'bzead-android/android/app/src/main/play-store-icon.png') };
 
 const SPLASH = {
@@ -39,12 +48,17 @@ async function generateLauncherIcons() {
   // logo is full-bleed inside the adaptive launcher shape.
   const backgroundColor = { r: 30, g: 41, b: 59 };
 
+  // Trim transparent padding from source once, reuse buffer for all densities.
+  const trimmedBuf = await sharp('/workspaces/BZEAD/logo.png')
+    .trim()
+    .toBuffer();
+
   for (const [density, size] of Object.entries(DENSITIES)) {
     const dir = path.join(RES_DIR, `mipmap-${density}`);
     await ensureDir(dir);
 
-    // Full-bleed square logo with background fill.
-    const fullBleed = sharp(SOURCE)
+    // Full-bleed square logo with background fill (trim whitespace first).
+    const fullBleed = sharp(trimmedBuf)
       .resize(size, size, { fit: 'cover' })
       .flatten({ background: backgroundColor });
 
@@ -60,17 +74,18 @@ async function generateLauncherIcons() {
       .png()
       .toFile(path.join(dir, 'ic_launcher_round.png'));
 
-    // Adaptive foreground: full-bleed logo used as the foreground layer.
-    // The background layer is provided by ic_launcher_background color.
-    await sharp(SOURCE)
-      .resize(size, size, { fit: 'cover' })
+    // Adaptive foreground: trim whitespace first so the logo fills the full
+    // 108dp canvas instead of appearing as a small centred square.
+    const fgSize = FOREGROUND_DENSITIES[density];
+    await sharp(trimmedBuf)
+      .resize(fgSize, fgSize, { fit: 'cover' })
       .png()
       .toFile(path.join(dir, 'ic_launcher_foreground.png'));
   }
 
   // Play Store icon
   await ensureDir(path.dirname(PLAY_STORE.out));
-  await sharp(SOURCE)
+  await sharp(trimmedBuf)
     .resize(PLAY_STORE.size, PLAY_STORE.size, { fit: 'cover' })
     .flatten({ background: backgroundColor })
     .png()

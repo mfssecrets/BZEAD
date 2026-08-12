@@ -1,13 +1,17 @@
+import { App as CapacitorApp } from '@capacitor/app';
 import { isNativeAndroid } from './nativePlatform';
 import logger from '../utils/logger';
 
 const BUILD_INFO_ENDPOINT = '/build-info.json';
 const BUILD_CACHE_KEY = 'beauzead_last_seen_build_id';
-const CHECK_INTERVAL_MS = 60 * 1000;
+const CHECK_INTERVAL_MS = 60 * 60 * 1000; // hourly
+// Only reload on resume if the app was in background longer than this
+const BACKGROUND_RELOAD_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
 
 let syncInitialized = false;
 let checkInFlight = false;
 let lastSeenBuildId: string | null = null;
+let backgroundAt: number | null = null;
 
 function readStoredBuildId(): string | null {
   try {
@@ -85,17 +89,27 @@ export function initializeNativeLiveWebSync(): void {
 
   void checkForBuildUpdate('startup');
 
-  window.addEventListener('focus', () => {
-    void checkForBuildUpdate('focus');
-  });
-
-  window.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      void checkForBuildUpdate('visibilitychange');
+  // Only reload on resume if the app was backgrounded for a long time.
+  // Short away-periods (checking email for OTP, switching apps) must never
+  // trigger a reload and lose the user's in-progress form state.
+  void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    if (!isActive) {
+      backgroundAt = Date.now();
+      return;
+    }
+    if (backgroundAt !== null) {
+      const elapsed = Date.now() - backgroundAt;
+      backgroundAt = null;
+      if (elapsed >= BACKGROUND_RELOAD_THRESHOLD_MS) {
+        void checkForBuildUpdate('long-background');
+      }
     }
   });
 
+  // Periodic hourly check for long-running active sessions
   window.setInterval(() => {
-    void checkForBuildUpdate('interval');
+    if (document.visibilityState !== 'hidden') {
+      void checkForBuildUpdate('interval');
+    }
   }, CHECK_INTERVAL_MS);
 }

@@ -25,7 +25,7 @@ import { fetchPublicProductPrices } from '../lib/pricingService';
 import { useDestinationCountry } from '../hooks/useDestinationCountry';
 import { useDeliveryEstimate } from '../hooks/useDeliveryEstimate';
 import { supabase } from '../lib/supabase';
-import { flyToCart } from '../utils/flyToCart';
+import { flyToCart, getCartTarget } from '../utils/flyToCart';
 import { buildAppRedirect } from '../utils/authEnv';
 import { shareProduct } from '../utils/shareProduct';
 
@@ -1103,7 +1103,7 @@ const ProductDetailsPage: React.FC = () => {
                   setAddingToCart(true);
                   try {
                     const img = productImageRef.current;
-                    const cart = document.getElementById('cart-icon');
+                    const cart = getCartTarget();
                     if (img && cart) {
                       flyToCart(img, cart);
                     }

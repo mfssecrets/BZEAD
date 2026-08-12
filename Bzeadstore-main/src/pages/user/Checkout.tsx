@@ -846,13 +846,13 @@ const CheckoutForm: React.FC<
                 address: billingAddressForStripe,
               },
             },
-            // Don't redirect — handle result in-page.
-            // `buildAppRedirect` always resolves to the public BASE_URL on native
-            // (Capacitor WebView origin `https://localhost` is internal-only) and to
-            // the current origin on web. The public domain is declared as an
-            // autoVerified deep-link in AndroidManifest so a forced redirect can
-            // return to the installed app via Android App Links.
-            return_url: buildAppRedirect('/checkout/confirmation'),
+            // On native the WebView origin is `https://localhost` (internal Capacitor bundle).
+            // Using `https://localhost` as return_url means any 3DS/UPI redirect lands back
+            // inside the same WebView and React Router handles it — the app never leaves the bundle.
+            // On web, use the public domain.
+            return_url: isNativePlatform
+              ? 'https://localhost/checkout/confirmation'
+              : buildAppRedirect('/checkout/confirmation'),
           },
           redirect: 'if_required',
         });

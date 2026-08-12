@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.bzead.buyer",
+      "package_name": "com.bzead.app",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_BZEAD_BUYER_RELEASE_KEYSTORE_SHA256"
+        "2B:6C:9E:92:FA:26:0D:D2:A6:3C:16:00:BE:10:ED:B6:2B:95:77:2B:7A:C2:09:D3:E6:25:FC:27:C1:69:4A:C4"
       ]
     }
   }

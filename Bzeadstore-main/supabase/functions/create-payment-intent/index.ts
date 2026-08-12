@@ -169,13 +169,9 @@ Deno.serve(async (req: Request) => {
       },
     };
 
-    // Let Stripe automatically surface only methods enabled for this account/currency.
-    // For native clients (Capacitor WebView) we disallow redirect-based methods because the
-    // WebView origin is `https://localhost` and any forced Stripe redirect cannot return to it.
-    const isNativeClient = client === 'native';
-    paymentIntentPayload.automatic_payment_methods = isNativeClient
-      ? { enabled: true, allow_redirects: 'never' }
-      : { enabled: true };
+    // All clients use the same payment method config.
+    // allow_redirects:'never' blocked Indian card 3DS flows — removed.
+    paymentIntentPayload.automatic_payment_methods = { enabled: true };
 
     const paymentIntent = await stripe.paymentIntents.create(paymentIntentPayload);
 

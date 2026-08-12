@@ -11,6 +11,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, Loader2, AlertTriangle, Trash2 } from 'lucide-react';
 import { calculateCheckoutPricing, fetchPublicProductPrices, type CheckoutPricingResult } from '../../lib/pricingService';
 import { useDestinationCountry } from '../../hooks/useDestinationCountry';
+import { isNativePlatform } from '../../mobile/nativePlatform';
 
 export const CartPage: React.FC = () => {
   const { user, currentAuthUser } = useAuth();
@@ -309,7 +310,7 @@ export const CartPage: React.FC = () => {
                 return (
                   <div
                     key={cartItem.cartItemId}
-                    className={`flex gap-3 border border-[#ddd] px-3 py-3 last:mb-0 md:border-x-0 md:border-t-0 md:px-0 sm:gap-4 sm:py-4 ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={`native-cart-item flex gap-2.5 border border-[#ddd] px-3 py-2.5 last:mb-0 md:border-x-0 md:border-t-0 md:px-0 sm:gap-4 sm:py-4 ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     {/* Checkbox */}
                     <div className="pt-1 shrink-0">
@@ -322,7 +323,7 @@ export const CartPage: React.FC = () => {
                     </div>
 
                     {/* Image */}
-                    <div className="shrink-0 w-[78px] h-[78px] sm:w-[90px] sm:h-[90px] md:w-[100px] md:h-[100px] rounded-lg border border-[#eee] bg-[#f9f9f9] overflow-hidden">
+                    <div className={`native-cart-image shrink-0 rounded-lg border border-[#eee] bg-[#f9f9f9] overflow-hidden ${isNativePlatform ? 'w-[62px] h-[62px]' : 'w-[78px] h-[78px] sm:w-[90px] sm:h-[90px] md:w-[100px] md:h-[100px]'}`}>
                       <img
                         src={cartItem.product.image_url}
                         alt={cartItem.product.name}
@@ -359,7 +360,7 @@ export const CartPage: React.FC = () => {
                       </div>
 
                       {/* Quantity Controls + Actions */}
-                      <div className="flex items-center gap-3 whitespace-nowrap">
+                      <div className="native-cart-qty-row flex items-center gap-2 flex-wrap">
                         <div className="flex items-center border border-[#ddd] rounded-lg overflow-hidden">
                           <button
                             onClick={() => handleUpdateQuantity(cartItem.cartItemId, cartItem.quantity - 1)}
@@ -382,23 +383,25 @@ export const CartPage: React.FC = () => {
 
                         {isUpdating && <Loader2 className="w-4 h-4 text-[#ff9900] animate-spin" />}
 
-                        <button
-                          onClick={() => setConfirmRemoveId(cartItem.cartItemId)}
-                          disabled={isUpdating}
-                          data-no-global-confirm="true"
-                          aria-label={`Remove ${cartItem.product.name} from cart`}
-                          className="order-2 ml-auto text-[#0f1111] bg-transparent border-none cursor-pointer hover:text-[#c7511f] disabled:opacity-50 p-1 md:static md:p-0"
-                        >
-                          <Trash2 className="h-5 w-5 md:hidden" aria-hidden="true" />
-                          <span className="hidden md:inline">Delete</span>
-                        </button>
-                        <button
-                          onClick={() => handleMoveToWishlist(cartItem)}
-                          disabled={isUpdating}
-                          className="order-1 text-[12px] text-[#007185] font-semibold bg-transparent border-none cursor-pointer hover:text-[#c7511f] hover:underline disabled:opacity-50 p-0 md:after:content-['|'] md:after:ml-3 md:after:text-[#ddd]"
-                        >
-                          Move to Wishlist
-                        </button>
+                        <div className="native-cart-actions flex items-center gap-2">
+                          <button
+                            onClick={() => handleMoveToWishlist(cartItem)}
+                            disabled={isUpdating}
+                            className="text-[11px] text-[#007185] font-semibold bg-transparent border-none cursor-pointer hover:text-[#c7511f] hover:underline disabled:opacity-50 p-0 md:after:content-['|'] md:after:ml-3 md:after:text-[#ddd]"
+                          >
+                            Move to Wishlist
+                          </button>
+                          <button
+                            onClick={() => setConfirmRemoveId(cartItem.cartItemId)}
+                            disabled={isUpdating}
+                            data-no-global-confirm="true"
+                            aria-label={`Remove ${cartItem.product.name} from cart`}
+                            className="ml-auto text-[#0f1111] bg-transparent border-none cursor-pointer hover:text-[#c7511f] disabled:opacity-50 p-1 md:static md:p-0"
+                          >
+                            <Trash2 className="h-4 w-4 md:hidden" aria-hidden="true" />
+                            <span className="hidden md:inline">Delete</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -417,9 +420,9 @@ export const CartPage: React.FC = () => {
             </div>
 
             {/* ═══════════════════════════════════════════════
-                 CART SUMMARY (anchored below mobile item scroller)
+                 CART SUMMARY (sticky above MobileNav on native)
                 ═══════════════════════════════════════════════ */}
-            <div className="shrink-0 px-2 pt-2 md:px-0 md:pt-0">
+            <div className="native-cart-checkout shrink-0 px-2 pt-2 md:px-0 md:pt-0">
               {pricingLoading ? (
                 <div className="bg-white border border-[#ddd] rounded-[10px] p-6 sm:p-8 text-center">
                 <div className="flex items-center justify-center gap-3 mb-3">

@@ -279,80 +279,83 @@ const OrderConfirmationPage: React.FC = () => {
     const displayOrderId = checkoutResult.orderId || checkoutResult.tempOrderId || tempOrderId;
 
     return (
-      <div className="min-h-screen bg-[#eaeded] flex flex-col">
+      <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
         <Header />
-        <div className="flex-1 py-6">
-          <div className="max-w-[900px] mx-auto px-4">
-            <div className="bg-white border border-[#ddd] rounded-lg p-6 mb-5">
-              <div className="flex items-center gap-3 mb-3">
-                {isSuccess ? (
-                  <CheckCircle2 size={28} className="text-[#067d62]" />
-                ) : (
-                  <XCircle size={28} className="text-[#b12704]" />
-                )}
-                <h1 className="text-xl sm:text-2xl font-bold text-[#0f1111]">
-                  {isSuccess ? 'PAYMENT SUCESS, CHECK YOUR ORDER STATUS ON MY ORDERS' : 'PAYMENT FAILED'}
-                </h1>
-              </div>
+        <div className="flex-1 py-4 pb-20">
+          <div className="max-w-[560px] mx-auto px-3">
 
-              {displayOrderId && (
-                <p className="text-sm text-[#0f1111] font-semibold mb-1">{isSuccess ? 'Order No / Temp Order No' : 'Reference ID'}: {displayOrderId}</p>
-              )}
-              {!!checkoutResult.paymentIntentId && (
-                <p className="text-xs text-gray-500 mb-1">Payment reference: {checkoutResult.paymentIntentId}</p>
-              )}
-              {!isSuccess && checkoutResult.failureReason && (
-                <p className="text-sm text-[#b12704] mt-2">{checkoutResult.failureReason}</p>
-              )}
+            {/* Status banner */}
+            <div className={`flex items-center gap-2.5 rounded-lg px-4 py-3 mb-3 ${isSuccess ? 'bg-[#f0faf0] border border-[#c6f0d8]' : 'bg-[#fff1f0] border border-[#ffd0cc]'}`}>
+              {isSuccess
+                ? <CheckCircle2 size={20} className="text-[#067d62] shrink-0" />
+                : <XCircle size={20} className="text-[#b12704] shrink-0" />}
+              <div className="min-w-0">
+                <p className={`text-[13px] font-bold leading-tight ${isSuccess ? 'text-[#067d62]' : 'text-[#b12704]'}`}>
+                  {isSuccess ? 'Payment Successful' : 'Payment Failed'}
+                </p>
+                {!isSuccess && checkoutResult.failureReason && (
+                  <p className="text-[11px] text-[#b12704] mt-0.5 leading-snug">{checkoutResult.failureReason}</p>
+                )}
+              </div>
             </div>
 
-            <div className="bg-white border border-[#ddd] rounded-lg p-5 mb-5">
-              <h2 className="text-lg font-bold text-[#0f1111] mb-4">Items</h2>
-              <div className="space-y-4">
+            {/* Reference */}
+            {(displayOrderId || checkoutResult.paymentIntentId) && (
+              <div className="bg-white border border-[#e5e7eb] rounded-lg px-3 py-2.5 mb-3 space-y-0.5">
+                {displayOrderId && (
+                  <p className="text-[11px] text-gray-500">{isSuccess ? 'Order ID' : 'Reference'}: <span className="font-semibold text-gray-800">{displayOrderId}</span></p>
+                )}
+                {checkoutResult.paymentIntentId && (
+                  <p className="text-[10px] text-gray-400 font-mono truncate">PI: {checkoutResult.paymentIntentId}</p>
+                )}
+              </div>
+            )}
+
+            {/* Items */}
+            <div className="bg-white border border-[#e5e7eb] rounded-lg p-3 mb-3">
+              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Items</p>
+              <div className="divide-y divide-gray-100">
                 {(checkoutResult.items || []).map((item, index) => (
-                  <div key={`${item.productId}-${index}`} className="border border-gray-100 rounded-lg p-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-24 h-24 rounded-md border border-gray-100 bg-gray-50 overflow-hidden flex-shrink-0">
-                        {item.productImage ? (
-                          <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[18px] font-semibold text-[#0f1111] leading-snug line-clamp-2 mb-1">{item.productName}</p>
-                        <div className="flex flex-wrap gap-2 text-sm text-gray-600 mb-1">
-                          {item.selectedSize && <span className="px-2 py-0.5 bg-gray-100 rounded">Size: {item.selectedSize}</span>}
-                          {item.selectedColor && <span className="px-2 py-0.5 bg-gray-100 rounded">Color: {item.selectedColor}</span>}
-                        </div>
-                        <p className="text-sm text-gray-700">Qty: {item.quantity} <span className="mx-2">•</span> {fmtCurrency(item.price, checkoutResult.currency)} each</p>
-                        <p className="text-[30px] mt-2 font-semibold text-[#0f1111]">{fmtCurrency(item.price * item.quantity, checkoutResult.currency)}</p>
-                      </div>
+                  <div key={`${item.productId}-${index}`} className="flex gap-2.5 py-2 first:pt-0 last:pb-0">
+                    <div className="w-[52px] h-[52px] rounded border border-gray-100 bg-gray-50 overflow-hidden shrink-0">
+                      {item.productImage
+                        ? <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-[9px] text-gray-400">No img</div>}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-[#0f1111] line-clamp-2 leading-snug">{item.productName}</p>
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {item.selectedSize && <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-px rounded">Size: {item.selectedSize}</span>}
+                        {item.selectedColor && <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-px rounded">Color: {item.selectedColor}</span>}
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} · {fmtCurrency(item.price, checkoutResult.currency)} each</p>
+                    </div>
+                    <p className="text-[13px] font-bold text-[#b12704] shrink-0 self-center">{fmtCurrency(item.price * item.quantity, checkoutResult.currency)}</p>
                   </div>
                 ))}
               </div>
-
-              <div className="border-t border-[#ddd] mt-4 pt-3 flex items-center justify-between">
-                <span className="text-base font-semibold text-[#0f1111]">Total</span>
-                <span className="text-xl font-bold text-[#0f1111]">{fmtCurrency(checkoutResult.totalAmount, checkoutResult.currency)}</span>
+              <div className="border-t border-[#e5e7eb] mt-2 pt-2 flex justify-between items-center">
+                <span className="text-[12px] font-semibold text-gray-700">Total</span>
+                <span className="text-[14px] font-bold text-[#0f1111]">{fmtCurrency(checkoutResult.totalAmount, checkoutResult.currency)}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Actions */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => navigate('/orders')}
-                className="px-6 py-3 bg-[#ffd814] hover:bg-[#f7ca00] border border-[#fcd200] text-[#0f1111] rounded-lg font-bold text-sm transition-colors"
+                className="py-2.5 bg-[#ffd814] hover:bg-[#f7ca00] border border-[#fcd200] text-[#0f1111] rounded-lg font-bold text-[12px] transition-colors"
               >
                 MY ORDERS
               </button>
               <button
                 onClick={() => navigate('/cart')}
-                className="px-6 py-3 bg-white border border-[#ddd] hover:bg-gray-50 text-[#0f1111] rounded-lg font-bold text-sm transition-colors"
+                className="py-2.5 bg-white border border-[#ddd] hover:bg-gray-50 text-[#0f1111] rounded-lg font-bold text-[12px] transition-colors"
               >
                 BACK TO CART
               </button>
             </div>
+
           </div>
         </div>
         <Footer />

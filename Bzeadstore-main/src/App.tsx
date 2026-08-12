@@ -12,6 +12,7 @@ import { OfflineScreen, useOnlineStatus } from './components/OfflineScreen';
 import {
   NativePullToRefreshIndicator,
   useNativeBackButton,
+  useNativePagePersist,
   useNativePullToRefresh,
 } from './mobile/nativeRuntime';
 import { openExternalUrl } from './mobile/externalLinks';
@@ -225,6 +226,7 @@ const NativeRuntimeGuard: React.FC<{ children: (refreshEpoch: number) => React.R
   const [refreshEpoch, setRefreshEpoch] = useState(0);
 
   useNativeBackButton(location.pathname);
+  useNativePagePersist(location.pathname);
 
   const handleRefresh = useCallback(async () => {
     setRefreshEpoch((prev) => prev + 1);

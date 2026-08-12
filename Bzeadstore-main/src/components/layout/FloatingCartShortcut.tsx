@@ -15,6 +15,7 @@ export const FloatingCartShortcut: React.FC = () => {
 
   return (
     <button
+      id="floating-cart-btn"
       type="button"
       onClick={() => navigate('/cart')}
       aria-label={`Cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}

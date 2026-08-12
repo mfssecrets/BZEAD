@@ -3,7 +3,7 @@ import { Loader2, Minus, Plus, ShoppingCart, X } from 'lucide-react';
 import type { Product } from '../../types';
 import { useCart } from '../../contexts/CartContext';
 import { useCurrency } from '../../contexts/CurrencyContext';
-import { flyToCart } from '../../utils/flyToCart';
+import { flyToCart, getCartTarget } from '../../utils/flyToCart';
 import { resolveProductDisplayImage, resolveProductImageUrl } from '../../lib/productService';
 import {
   buildVariantSelectionState,
@@ -123,7 +123,7 @@ export const ProductVariantDialog: React.FC<ProductVariantDialogProps> = ({
     if (!canAddToCart || !selectionState.currentVariant) return;
     setAdding(true);
     try {
-      const cartIcon = document.getElementById('cart-icon');
+      const cartIcon = getCartTarget();
       if (imageRef.current && cartIcon) {
         void flyToCart(imageRef.current, cartIcon);
       }
