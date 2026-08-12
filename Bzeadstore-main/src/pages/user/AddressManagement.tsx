@@ -27,6 +27,7 @@ const UserAddressManagement: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const editingAddress = editingId ? addresses.find((a) => a.id === editingId) : undefined;
 
@@ -129,10 +130,6 @@ const UserAddressManagement: React.FC = () => {
   };
 
   const handleDeleteAddress = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this address?')) {
-      return;
-    }
-
     try {
       setIsSaving(true);
       setError(null);
@@ -334,9 +331,9 @@ const UserAddressManagement: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => handleDeleteAddress(address.id)}
+                    onClick={() => setConfirmDeleteId(address.id)}
                     disabled={address.isDefault || addresses.length === 1 || isSaving}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                     Delete
@@ -369,6 +366,30 @@ const UserAddressManagement: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Custom delete confirmation — replaces window.confirm to avoid the ugly 'https://localhost' browser dialog on Android */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-[10001] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Address</h3>
+            <p className="text-sm text-gray-600 mb-6">Are you sure you want to delete this address? This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { const id = confirmDeleteId; setConfirmDeleteId(null); handleDeleteAddress(id); }}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
       <MobileNav />
