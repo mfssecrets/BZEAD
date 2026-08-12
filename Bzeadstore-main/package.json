@@ -12,6 +12,8 @@
     "generate:bulk-template": "node scripts/generate-bulk-product-template.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:cf": "wrangler pages dev dist --compatibility-date=2026-08-12",
+    "deploy:cf": "wrangler pages deploy dist --project-name=bzead",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -65,6 +67,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.3.6",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "wrangler": "^3.114.0"
   }
 }

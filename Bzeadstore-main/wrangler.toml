@@ -1,0 +1,29 @@
+# Cloudflare Pages configuration for BZEAD
+# Project name used by `wrangler pages deploy`
+name = "bzead"
+
+# Directory produced by `npm run build`
+pages_build_output_dir = "dist"
+
+# Cloudflare Workers compatibility date
+compatibility_date = "2026-08-12"
+
+# ---------------------------------------------------------------------------
+# Dashboard settings (set these in Cloudflare Pages when creating the project):
+#   - Root directory: Bzeadstore-main
+#   - Build command:  npm ci && npm run build
+#   - Build output:   dist
+#
+# Required build environment variables (add in Cloudflare dashboard):
+#   VITE_SUPABASE_URL
+#   VITE_SUPABASE_ANON_KEY
+#   VITE_STRIPE_PUBLISHABLE_KEY
+#   VITE_ONESIGNAL_APP_ID
+#   VITE_DOMAIN
+#   VITE_PUBLIC_APP_URL
+#   VITE_ENVIRONMENT
+#
+# Optional:
+#   VITE_ADSENSE_CLIENT
+#   VITE_ADSENSE_SLOT_HOME_FOOTER
+# ---------------------------------------------------------------------------

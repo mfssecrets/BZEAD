@@ -68,3 +68,7 @@ android/.gradle/
 android/capacitor-android/build/
 android/capacitor-cordova-android-plugins/build/
 android/local.properties
+
+# Cloudflare / Wrangler local artifacts
+.wrangler/
+.dev.vars
