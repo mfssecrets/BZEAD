@@ -25,7 +25,10 @@ not_found_handling = "single-page-application"
 #   VITE_PUBLIC_APP_URL
 #   VITE_ENVIRONMENT
 #
-# Optional:
+# Optional frontend variables:
 #   VITE_ADSENSE_CLIENT
 #   VITE_ADSENSE_SLOT_HOME_FOOTER
+#
+# Optional download redirect (AAB/APK files exceed Workers asset size limit):
+#   DOWNLOAD_BASE_URL  (e.g. https://pub-xxx.r2.dev or https://storage.bzead.com)
 # ---------------------------------------------------------------------------

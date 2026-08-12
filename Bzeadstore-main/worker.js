@@ -40,6 +40,17 @@ export default {
       );
     }
 
+    // Downloadable assets (AAB/APK) are too large for Workers static assets.
+    // Serve them from an external storage URL configured via DOWNLOAD_BASE_URL.
+    const downloadMatch = pathname.match(/^\/download\//);
+    if (downloadMatch) {
+      const base = (env.DOWNLOAD_BASE_URL || '').replace(/\/+$/, '');
+      if (base) {
+        return Response.redirect(`${base}${pathname}`, 302);
+      }
+      return new Response('Download storage not configured', { status: 503 });
+    }
+
     // Static assets and SPA fallback are served by the assets binding
     const response = await env.ASSETS.fetch(request);
 

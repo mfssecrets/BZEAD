@@ -43,6 +43,7 @@ Go to **Settings > Secrets and variables > Actions** and add these **repository 
 | `VITE_ENVIRONMENT` | `production` |
 | `VITE_ADSENSE_CLIENT` | *(Optional)* Google AdSense publisher ID |
 | `VITE_ADSENSE_SLOT_HOME_FOOTER` | *(Optional)* Google AdSense slot ID |
+| `DOWNLOAD_BASE_URL` | *(Optional)* External base URL for `/download/*` files (AAB/APK). Workers static assets are limited to 25 MiB, so large downloads must be hosted externally. |
 
 ## 2. Cloudflare Worker project settings (Git integration)
 

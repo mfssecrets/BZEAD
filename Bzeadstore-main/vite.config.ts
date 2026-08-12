@@ -1,5 +1,23 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { rm } from 'node:fs/promises';
+import path from 'node:path';
+
+/** Remove files/folders from dist that exceed Cloudflare Workers asset limits. */
+function excludeOversizedAssets(): Plugin {
+  return {
+    name: 'exclude-oversized-assets',
+    async closeBundle() {
+      const downloadDir = path.resolve(process.cwd(), 'dist', 'download');
+      try {
+        await rm(downloadDir, { recursive: true, force: true });
+        console.log('[exclude-oversized-assets] Removed dist/download (>25 MiB assets not allowed in Workers)');
+      } catch {
+        // Ignore if directory does not exist
+      }
+    },
+  };
+}
 
 /** Fail the build if required VITE_* env vars are missing. */
 function envGuard(required: string[]): Plugin {
@@ -23,6 +41,7 @@ export default defineConfig({
   plugins: [
     react(),
     envGuard(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']),
+    excludeOversizedAssets(),
     {
       name: 'security-headers',
       configureServer(server) {
