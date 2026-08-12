@@ -252,7 +252,10 @@ export const CartPage: React.FC = () => {
     >
       <Header />
 
-      <main className="flex flex-1 min-h-0 w-full max-w-[1100px] mx-auto flex-col bg-white px-0 py-0 pb-0 md:block md:bg-transparent md:px-4 md:py-5 md:pb-5">
+      <main
+        className="flex flex-1 min-h-0 w-full max-w-[1100px] mx-auto flex-col bg-white px-0 py-0 pb-0 md:block md:bg-transparent md:px-4 md:py-5 md:pb-5"
+        style={isNativePlatform ? { flex: 1, minHeight: 0, overflowY: 'auto', display: 'block' } : undefined}
+      >
 
         {/* ─── Loading ─── */}
         {loading ? (
@@ -277,7 +280,10 @@ export const CartPage: React.FC = () => {
             {/* ═══════════════════════════════════════════════
                  CART ITEMS CARD
                 ═══════════════════════════════════════════════ */}
-            <div className="flex flex-1 min-h-0 flex-col bg-white border-0 rounded-none p-0 md:block md:border md:border-[#ddd] md:rounded-[10px] md:p-6 md:mb-4">
+            <div
+              className="flex flex-1 min-h-0 flex-col bg-white border-0 rounded-none p-0 md:block md:border md:border-[#ddd] md:rounded-[10px] md:p-6 md:mb-4"
+              style={isNativePlatform ? { display: 'block' } : undefined}
+            >
               <h1 className="hidden text-[18px] sm:text-[22px] font-bold text-[#0f1111] mb-0.5 md:block">Shopping Cart</h1>
               <p className="hidden text-[12px] text-[#888] mb-3 md:block">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
 
@@ -303,6 +309,7 @@ export const CartPage: React.FC = () => {
               {/* ─── Cart Items ─── */}
               <div
                 className="native-cart-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-2 md:block md:overflow-visible md:px-0"
+                style={isNativePlatform ? { display: 'block', overflow: 'visible' } : undefined}
               >
                 {cartItems.map((cartItem) => {
                 const itemPrice =
@@ -430,7 +437,9 @@ export const CartPage: React.FC = () => {
             <div
               className="native-cart-checkout shrink-0 px-2 pt-2 md:px-0 md:pt-0"
               style={isNativePlatform ? {
-                flexShrink: 0,
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 10,
                 background: '#fff',
                 borderTop: '1px solid #e5e7eb',
                 boxShadow: '0 -2px 10px rgba(0,0,0,0.07)',
