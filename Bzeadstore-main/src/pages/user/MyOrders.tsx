@@ -709,7 +709,7 @@ export const MyOrders: React.FC = () => {
           className="bg-[#0f172a] text-white sticky z-[70]"
           style={{ top: 'var(--bz-header-offset)' }}
         >
-          <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="max-w-4xl mx-auto px-4 h-10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button onClick={() => navigate(-1)} className="text-white/70 hover:text-white">
                 <ArrowLeft size={20} />

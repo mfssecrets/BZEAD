@@ -298,7 +298,7 @@ export const CartPage: React.FC = () => {
               </div>
 
               {/* ─── Cart Items ─── */}
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-2 md:block md:overflow-visible md:px-0">
+              <div className="native-cart-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-2 md:block md:overflow-visible md:px-0">
                 {cartItems.map((cartItem) => {
                 const itemPrice =
                   cartItem.variantPrice ??
