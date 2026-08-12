@@ -1,18 +1,20 @@
-# Cloudflare Pages configuration for BZEAD
-# Project name used by `wrangler pages deploy`
+# Cloudflare Worker configuration for BZEAD
 name = "bzead"
-
-# Directory produced by `npm run build`
-pages_build_output_dir = "dist"
-
-# Cloudflare Workers compatibility date
+main = "worker.js"
 compatibility_date = "2026-08-12"
 
+# Static assets produced by `npm run build`
+[assets]
+directory = "dist"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "single-page-application"
+
 # ---------------------------------------------------------------------------
-# Dashboard settings (set these in Cloudflare Pages when creating the project):
+# Dashboard settings (when using Cloudflare Workers Git integration):
 #   - Root directory: Bzeadstore-main
 #   - Build command:  npm ci && npm run build
-#   - Build output:   dist
+#   - Deploy command: npx wrangler deploy
 #
 # Required build environment variables (add in Cloudflare dashboard):
 #   VITE_SUPABASE_URL

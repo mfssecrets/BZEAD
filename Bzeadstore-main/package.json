@@ -12,8 +12,7 @@
     "generate:bulk-template": "node scripts/generate-bulk-product-template.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "preview:cf": "wrangler pages dev dist --compatibility-date=2026-08-12",
-    "deploy:cf": "wrangler pages deploy dist --project-name=bzead",
+    "deploy:worker": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
