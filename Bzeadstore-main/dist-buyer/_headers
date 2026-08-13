@@ -1,17 +1,13 @@
-/*
-  Security Headers for Amplify Hosting
-  These headers will be applied to all responses from www.bzead.com
-*/
+# Security Headers for Cloudflare Pages
+# These headers will be applied to all responses from www.bzead.com
 
-/*
-  X-Frame-Options: Prevents clickjacking attacks
-  X-Content-Type-Options: Prevents MIME type sniffing
-  X-XSS-Protection: Enables XSS filtering
-  Referrer-Policy: Controls referrer information
-  Permissions-Policy: Controls browser features
-  Strict-Transport-Security: Forces HTTPS
-  Content-Security-Policy: Prevents XSS and data injection attacks
-*/
+# X-Frame-Options: Prevents clickjacking attacks
+# X-Content-Type-Options: Prevents MIME type sniffing
+# X-XSS-Protection: Enables XSS filtering
+# Referrer-Policy: Controls referrer information
+# Permissions-Policy: Controls browser features
+# Strict-Transport-Security: Forces HTTPS
+# Content-Security-Policy: Prevents XSS and data injection attacks
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 1; mode=block
