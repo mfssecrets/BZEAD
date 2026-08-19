@@ -59,8 +59,11 @@ function main() {
   checkAndroidSdk();
   if (target === 'release') {
     run('./gradlew bundleRelease', ANDROID_DIR);
+    run('./gradlew assembleRelease', ANDROID_DIR);
     console.log('\n✅ Release AAB:');
     console.log(path.join(ANDROID_DIR, 'app/build/outputs/bundle/release/app-release.aab'));
+    console.log('\n✅ Release APK:');
+    console.log(path.join(ANDROID_DIR, 'app/build/outputs/apk/release/app-release.apk'));
   } else {
     run('./gradlew assembleDebug', ANDROID_DIR);
     console.log('\n✅ Debug APK:');

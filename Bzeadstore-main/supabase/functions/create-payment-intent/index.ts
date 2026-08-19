@@ -169,9 +169,12 @@ Deno.serve(async (req: Request) => {
       },
     };
 
-    // All clients use the same payment method config.
-    // allow_redirects:'never' blocked Indian card 3DS flows — removed.
-    paymentIntentPayload.automatic_payment_methods = { enabled: true };
+    // A Capacitor WebView cannot reliably resume an off-site payment redirect.
+    // Card authentication, including 3DS, remains available; this excludes only
+    // payment methods that require a full browser redirect (for example UPI).
+    paymentIntentPayload.automatic_payment_methods = client === 'native'
+      ? { enabled: true, allow_redirects: 'never' }
+      : { enabled: true };
 
     const paymentIntent = await stripe.paymentIntents.create(paymentIntentPayload);
 
