@@ -28,8 +28,13 @@
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-        <item name="windowSplashScreenBackground">#0f1e50</item>
+        <!-- Solid fallback approximating the radial gradient (#5de0e6 -> #0078a6) shown
+             briefly by the OS before Capacitor's own splash screen (with the real
+             gradient image) takes over. This attribute only accepts a flat color. -->
+        <item name="windowSplashScreenBackground">#1996b8</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
+        <!-- No background plate behind the icon — logo sits directly on the gradient. -->
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>
